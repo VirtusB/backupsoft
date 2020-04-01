@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<BorderPane prefWidth="800" prefHeight="800" fx:controller="HomeFX"
+            stylesheets="style.css"
+            xmlns:fx="http://javafx.com/fxml">
+    <top>
+        <Label styleClass="app-title" maxWidth="Infinity" alignment="TOP_CENTER">
+            <text>BackupSoft</text>
+            <graphic>
+                <ImageView fitHeight="35" fitWidth="35">
+                    <image>
+                        <Image url="backup-icon.png"/>
+                    </image>
+                </ImageView>
+            </graphic>
+        </Label>
+    </top>
+
+    <center>
+        <TableView styleClass="table-view" fx:id="directoryTableView">
+
+        </TableView>
+    </center>
+
+    <bottom>
+        <BorderPane>
+            <center>
+                <GridPane alignment="CENTER">
+
+                </GridPane>
+
+            </center>
+        </BorderPane>
+    </bottom>
+
+</BorderPane>
