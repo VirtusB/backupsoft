@@ -31,9 +31,15 @@
         <BorderPane>
             <center>
                 <GridPane alignment="CENTER">
-
+                    <Button styleClass="btn" text="Browse" GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="browseForDirectoryBtn">
+                        <GridPane.margin>
+                            <Insets>
+                                <bottom>70</bottom>
+                                <right>4</right>
+                            </Insets>
+                        </GridPane.margin>
+                    </Button>
                 </GridPane>
-
             </center>
         </BorderPane>
     </bottom>

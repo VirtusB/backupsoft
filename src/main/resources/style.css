@@ -94,3 +94,10 @@
     -fx-background-color: transparent;
 }
 
+.action-button-table-cell Button {
+    -fx-background-color: #090a0c;
+    -fx-text-fill: white;
+    -fx-font-family: "Arial";
+    -fx-font-size: 12px;
+}
+
