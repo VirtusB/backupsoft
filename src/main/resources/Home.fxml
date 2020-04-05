@@ -22,16 +22,33 @@
     </top>
 
     <center>
-        <TableView styleClass="table-view" fx:id="directoryTableView">
+        <GridPane styleClass="bbb" hgap="10" vgap="10" alignment="CENTER">
+            <CheckBox GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="activeCheckbox" text="Active"/>
 
-        </TableView>
+            <Label GridPane.rowIndex="2" GridPane.columnIndex="1">Backup Interval</Label>
+            <ComboBox promptText="Backup Interval" GridPane.rowIndex="3" GridPane.columnIndex="1" fx:id="backupIntervalCb"/>
+
+            <TableView GridPane.rowIndex="4" GridPane.columnIndex="1" styleClass="table-view" fx:id="directoryTableView">
+
+            </TableView>
+        </GridPane>
     </center>
 
     <bottom>
         <BorderPane>
             <center>
                 <GridPane alignment="CENTER">
-                    <Button styleClass="btn" text="Browse" GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="browseForDirectoryBtn">
+                    <Button styleClass="btn" text="Add New Folder" GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="browseForDirectoryBtn">
+                        <GridPane.margin>
+                            <Insets>
+                                <top>10</top>
+                                <bottom>15</bottom>
+                                <right>4</right>
+                            </Insets>
+                        </GridPane.margin>
+                    </Button>
+
+                    <Button styleClass="btn" text="Select Destination" GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="browseDestinationBtn">
                         <GridPane.margin>
                             <Insets>
                                 <bottom>70</bottom>
@@ -39,6 +56,15 @@
                             </Insets>
                         </GridPane.margin>
                     </Button>
+
+                    <TextField styleClass="destination-textfield" disable="true" fx:id="backupDestinationTextField" promptText="No Destination Selected" GridPane.rowIndex="2" GridPane.columnIndex="2">
+                        <GridPane.margin>
+                            <Insets>
+                                <bottom>70</bottom>
+                                <right>4</right>
+                            </Insets>
+                        </GridPane.margin>
+                    </TextField>
                 </GridPane>
             </center>
         </BorderPane>

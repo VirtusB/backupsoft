@@ -1,46 +1,140 @@
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.DirectoryChooser;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.RegexFileFilter;
 
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.prefs.Preferences;
 
 public class HomeFX {
     public TableView<BackupDirectory> directoryTableView;
     public BackupManager backupManager;
-    @FXML
     public Button browseForDirectoryBtn;
+    public Button browseDestinationBtn;
+    public TextField backupDestinationTextField;
+    public CheckBox activeCheckbox;
+    public ComboBox<BackupInterval> backupIntervalCb;
 
+    private Preferences preferences;
 
     @FXML
     protected void initialize() {
+        this.setupPreferences();
+
         this.backupManager = new BackupManager();
         this.createBackupDirectoryTable();
         this.addDirectoryBrowserBtnListener();
+        this.addDestinationBrowserBtnListener();
+        this.addActiveCheckBoxListener();
+        this.addBackupIntervalOptions();
+        this.addBackupIntervalListener();
+
+        this.fireEventsAfterPreferences();
     }
 
-    @FXML
+    private void setupPreferences() {
+        this.preferences = Preferences.userNodeForPackage(this.getClass());
+
+        boolean activeStatus = this.preferences.getBoolean("isActive", false);
+        this.setActiveStatusManually(activeStatus);
+
+        String destinationPath = this.preferences.get("destinationPath", "");
+        this.backupDestinationTextField.setText(destinationPath);
+
+        int backupIntervalId = this.preferences.getInt("backupIntervalId", -1);
+        if (backupIntervalId != -1) {
+            BackupInterval interval = BackupManager.findBackupIntervalById(backupIntervalId);
+            this.backupIntervalCb.getSelectionModel().select(interval);
+        }
+    }
+
+    private void fireEventsAfterPreferences() {
+        this.backupIntervalCb.fireEvent(new ActionEvent());
+    }
+
+    private void addActiveCheckBoxListener() {
+        this.activeCheckbox.selectedProperty().addListener((oldVal, old, newv) -> {
+            this.notifyBackupManager();
+            this.preferences.putBoolean("isActive", this.isActive());
+        });
+    }
+
+    private void addBackupIntervalListener() {
+        this.backupIntervalCb.setOnAction(event -> {
+            this.notifyBackupManager();
+
+            BackupInterval selectedBackupInterval = (BackupInterval) this.backupIntervalCb.getSelectionModel().getSelectedItem();
+            this.preferences.putInt("backupIntervalId", selectedBackupInterval.get_id());
+        });
+    }
+
+    private void setActiveStatusManually(boolean active) {
+        this.activeCheckbox.setSelected(active);
+    }
+
+    private boolean isActive() {
+        return this.activeCheckbox.isSelected();
+    }
+
+    private void notifyBackupManager() {
+        this.backupManager.addBackupInterval(this.isActive(), (BackupInterval) this.backupIntervalCb.getValue());
+    }
+
+    private void addBackupIntervalOptions() {
+        this.backupIntervalCb.getItems().addAll(BackupManager.BACKUP_INTERVAL_OPTIONS);
+    }
+
+    private void addDestinationBrowserBtnListener() {
+        this.browseDestinationBtn.setOnAction(event -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            File destinationDirectory = directoryChooser.showDialog(this.browseDestinationBtn.getScene().getWindow());
+
+            if (destinationDirectory == null) {
+                return;
+            }
+
+            String path = destinationDirectory.getAbsolutePath();
+
+            this.preferences.put("destinationPath", path);
+            this.backupDestinationTextField.setText(path);
+        });
+    }
+
     private void addDirectoryBrowserBtnListener() {
         this.browseForDirectoryBtn.setOnAction(event -> {
             DirectoryChooser directoryChooser = new DirectoryChooser();
             File selectedDirectory = directoryChooser.showDialog(this.browseForDirectoryBtn.getScene().getWindow());
-            List<File> filesInDirectory = Arrays.asList(selectedDirectory.listFiles());
+
+            if (selectedDirectory == null) {
+                return;
+            }
+
+            Collection<File> filesInDirectory = FileUtils.listFiles(
+                    selectedDirectory,
+                    new RegexFileFilter("^(.*?)"),
+                    DirectoryFileFilter.DIRECTORY
+            );
 
             AtomicLong totalFolderSize = new AtomicLong();
             List<BackupFile> listOfFiles = FXCollections.observableArrayList();
+
             filesInDirectory.forEach(file -> {
-                BackupFile newBackupFile = new BackupFile(file.getName(), file.length());
+                BackupFile newBackupFile = new BackupFile(file.getName(), file.length(), file.getAbsolutePath());
                 totalFolderSize.addAndGet(file.length());
                 listOfFiles.add(newBackupFile);
             });
 
             Date date = Calendar.getInstance().getTime();
-            DateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy hh:mm:ss");
+            DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
             String strDate = dateFormat.format(date);
 
             if (backupManager.getDirectoryManager().directoryWithPathExists(selectedDirectory.getAbsolutePath())) {
@@ -90,6 +184,8 @@ public class HomeFX {
         this.directoryTableView.getColumns().addAll(nameColumn, dateAddedColumn, sizeColumn, countOfFilesColumn, removeColumn);
         this.directoryTableView.setMaxHeight(450);
         this.directoryTableView.setMaxWidth(750);
+        this.directoryTableView.setPrefWidth(750);
+        this.directoryTableView.setPrefHeight(450);
     }
 
 }

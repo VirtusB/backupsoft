@@ -15,6 +15,7 @@ public class DirectoryManager {
     public DirectoryManager(BackupManager backupManager) {
         this.backupManager = backupManager;
         this.directories = this.getDirectoriesFromDatabase();
+        this.removeNonExistentDirectories();
     }
 
     public ObservableList<BackupDirectory> getDirectories() {
@@ -31,9 +32,22 @@ public class DirectoryManager {
         return this.backupManager.updateBackupDatabase();
     }
 
-
     public boolean directoryWithPathExists(final String path){
         return this.directories.stream().anyMatch(o -> o.getPath().equals(path));
+    }
+
+    private void removeNonExistentDirectories() {
+        ObservableList<BackupDirectory> toRemove = FXCollections.observableArrayList();
+
+        this.directories.forEach(directory -> {
+            File temp = new File(directory.getPath());
+            if (!temp.exists()) {
+                toRemove.add(directory);
+            }
+        });
+
+        this.directories.removeAll(toRemove);
+        this.backupManager.updateBackupDatabase();
     }
 
     private ObservableList<BackupDirectory> getDirectoriesFromDatabase() {
